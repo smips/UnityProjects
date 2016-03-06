@@ -4,10 +4,15 @@ using System.Collections;
 public class PlayerController : MonoBehaviour {
 	private Rigidbody2D rb;
 	private bool thrustActive;
-
+    [Header("Movement")]
 	public float thrustForce;
-	[Header("Stabilizer")]
+    [Header("Turning")]
+    public float maxAngularVelocity;
+    public float torqueScaler;
+    [Header("Stabilizer")]
+    public float defaultLinearDrag;
 	public float brakingLinearDrag;
+    public float defaultAngularDrag;
 	public float brakingAngularDrag;
 
 	// Use this for initialization
@@ -21,8 +26,8 @@ public class PlayerController : MonoBehaviour {
 			rb.drag = brakingLinearDrag;
 			rb.angularDrag = brakingAngularDrag;
 		} else {
-			rb.drag = 0;
-			rb.angularDrag = 0;
+			rb.drag = defaultLinearDrag;
+			rb.angularDrag = defaultAngularDrag;
 		}
 		thrustActive = Input.GetButton ("A");
 	}
@@ -31,13 +36,20 @@ public class PlayerController : MonoBehaviour {
 	void FixedUpdate () {
 		float horizontal = Input.GetAxis ("Horizontal");
 		float vertical = Input.GetAxis ("Vertical");
-		if (rb.angularVelocity < 180) {
-			rb.AddTorque (-horizontal);
-		}
+        float currentAngularVelocity = rb.angularVelocity;
+		if ((currentAngularVelocity <= maxAngularVelocity) && (currentAngularVelocity >= -maxAngularVelocity )) {
+			rb.AddTorque (-horizontal * torqueScaler);
+		} else{
+            if (currentAngularVelocity > 0){
+                rb.angularVelocity = maxAngularVelocity;
+            }   else{
+                rb.angularVelocity = -maxAngularVelocity;
+            }
+        }
 
 		if (thrustActive) {
-			Debug.Log (transform.rotation.eulerAngles.z);
-			Vector2 direction = new Vector2 (Mathf.Acos (transform.rotation.eulerAngles.z * Mathf.Deg2Rad), Mathf.Asin (transform.rotation.eulerAngles.z * Mathf.Deg2Rad));
+            float currentAngle = (this.transform.rotation.eulerAngles.z + 90) * Mathf.Deg2Rad;
+			Vector2 direction = new Vector2 (Mathf.Cos (currentAngle), Mathf.Sin (currentAngle));
 			rb.AddForce (direction * thrustForce);
 		}
 
