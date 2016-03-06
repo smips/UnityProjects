@@ -3,6 +3,7 @@ using System.Collections;
 
 public class PlayerController : MonoBehaviour {
 	private Rigidbody2D rb;
+	private SpriteRenderer spriteRenderer;
 	private bool thrustActive;
     [Header("Movement")]
 	public float thrustForce;
@@ -14,10 +15,13 @@ public class PlayerController : MonoBehaviour {
 	public float brakingLinearDrag;
     public float defaultAngularDrag;
 	public float brakingAngularDrag;
+	[Header("Sprites")]
+	public Sprite[] sprites;
 
 	// Use this for initialization
 	void Start () {
 		rb = this.GetComponent<Rigidbody2D> ();
+		spriteRenderer = this.GetComponent<SpriteRenderer> ();
 		thrustActive = false;
 	}
 
@@ -30,6 +34,7 @@ public class PlayerController : MonoBehaviour {
 			rb.angularDrag = defaultAngularDrag;
 		}
 		thrustActive = Input.GetButton ("A");
+
 	}
 	
 	// Update is called once per frame
@@ -46,6 +51,26 @@ public class PlayerController : MonoBehaviour {
                 rb.angularVelocity = -maxAngularVelocity;
             }
         }
+
+		if (horizontal > 0.1) {
+			if (thrustActive) {
+				spriteRenderer.sprite = sprites [5];
+			} else {
+				spriteRenderer.sprite = sprites [4];
+			}
+		} else if (horizontal < -0.1) {
+			if (thrustActive) {
+				spriteRenderer.sprite = sprites [3];
+			} else {
+				spriteRenderer.sprite = sprites [2];
+			}
+		} else {
+			if (thrustActive) {
+				spriteRenderer.sprite = sprites [1];
+			} else {
+				spriteRenderer.sprite = sprites [0];
+			}
+		}
 
 		if (thrustActive) {
             float currentAngle = (this.transform.rotation.eulerAngles.z + 90) * Mathf.Deg2Rad;
